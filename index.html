@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Испытай удачу</title>
 
-    <!-- Предзагрузка -->
-    <link rel="preload" href="fonts/BenzinBold.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="video/promo.mp4" as="video" type="video/mp4">
-    <link rel="preload" href="images/preview.png" as="image">
-
     <style>
         @font-face {
             font-family: "BenzinBold";
             src: url("fonts/BenzinBold.woff2") format("woff2");
             font-weight: 700;
-            font-style: normal;
             font-display: swap;
         }
 
@@ -40,16 +34,17 @@
             padding: 20px;
         }
 
+        /* Прелоадер */
         #preloader {
             position: fixed;
             inset: 0;
+            z-index: 100;
             background: radial-gradient(circle at 30% 20%, #23254d 0%, #0e1124 70%);
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            z-index: 100;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: 0.6s;
         }
 
             #preloader.hidden {
@@ -67,16 +62,16 @@
                 display: block;
             }
 
-        /* Секция видео */
+        /* Видео-контейнер */
         .video-section {
             position: relative;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-            background: #000 url("images/preview.png") no-repeat center / cover; /* Превью как фон */
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-            -webkit-transform: translateZ(0);
-            aspect-ratio: 16/9; /* Регулируйте под свое видео */
+            /* ВАЖНО: Превью ставим фоном через CSS, а не атрибутом poster */
+            background: #000 url("images/preview.png") no-repeat center / cover;
+            aspect-ratio: 16 / 9;
+            -webkit-transform: translateZ(0); /* Хак для iOS слоев */
         }
 
         video {
@@ -84,9 +79,9 @@
             height: 100%;
             display: block;
             object-fit: cover;
-            opacity: 0; /* Видео невидимо, пока не нажали кнопку */
-            transition: opacity 0.5s ease;
-            pointer-events: none;
+            pointer-events: none; /* Видео "невидимо" для кликов */
+            opacity: 0; /* Скрыто до нажатия */
+            transition: opacity 0.3s;
         }
 
         .play-button {
@@ -95,13 +90,14 @@
             color: white;
             font-family: "BenzinBold", sans-serif;
             font-size: 20px;
-            padding: 16px 40px;
+            padding: 18px 45px;
             border-radius: 50px;
             border: none;
             cursor: pointer;
             width: 100%;
             max-width: 320px;
             animation: pulse 2s infinite;
+            z-index: 10;
         }
 
         @keyframes pulse {
@@ -117,7 +113,7 @@
         h2 {
             font-family: "BenzinBold", sans-serif;
             font-size: 26px;
-            margin-top: 45px;
+            margin-top: 40px;
             background: linear-gradient(135deg, #ffe176, #ff5858);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -136,17 +132,18 @@
             max-width: 300px;
         }
 
+        /* Popup */
         .popup {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             visibility: hidden;
             opacity: 0;
-            transition: 0.4s;
             z-index: 200;
+            transition: 0.4s;
             padding: 20px;
         }
 
@@ -156,19 +153,18 @@
             }
 
         .popup-content {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #151833;
+            border: 1px solid #2d3166;
             border-radius: 20px;
             padding: 35px 20px;
             text-align: center;
             width: 100%;
-            max-width: 320px;
-            backdrop-filter: blur(18px);
+            max-aspect-ratio: 320;
         }
 
         .site-logo {
             position: fixed;
-            top: 20px;
+            top: 16px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 5;
@@ -182,8 +178,8 @@
 <body>
 
     <div id="preloader">
-        <div style="width:100px; height:100px; background: url('images/preview.png') no-repeat center/contain;"></div>
-        <div class="loading-text">Загрузка...</div>
+        <div style="width:80px; height:80px; background: url('images/preview.png') no-repeat center/contain;"></div>
+        <p style="margin-top:15px; font-family: BenzinBold; color: #ffe176;">ЗАГРУЗКА...</p>
     </div>
 
     <div class="site-logo">
@@ -192,14 +188,20 @@
 
     <div class="container" id="mainContent">
         <div class="video-section">
-            <!-- Видео запускается сразу без звука в фоне -->
+            <!--
+              ПОЛНЫЙ НАБОР АТРИБУТОВ ДЛЯ ИГНОРА СИСТЕМНОГО ПЛЕЕРА.
+              poster УБРАН СОЗНАТЕЛЬНО!
+            -->
             <video id="promoVideo"
                    preload="auto"
-                   autoplay
-                   muted
-                   loop
                    playsinline
-                   webkit-playsinline>
+                   webkit-playsinline="true"
+                   x5-playsinline="true"
+                   x5-video-player-type="h5-page"
+                   x5-video-player-fullscreen="false"
+                   disablePictureInPicture
+                   disableRemotePlayback
+                   muted>
                 <source src="video/promo.mp4" type="video/mp4">
             </video>
         </div>
@@ -212,9 +214,9 @@
 
     <div class="popup" id="popup">
         <div class="popup-content">
-            <h3 style="font-family: BenzinBold; background: linear-gradient(135deg, #ffe176, #ff5858); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💰 Вы могли выиграть 241 250 ₽!</h3>
-            <p style="margin: 15px 0; color: #ccc;">Попробуй прямо сейчас!</p>
-            <a href="https://t.me/+_k4mc4SGDTdjMDYy" class="tg-button">Испытать удачу</a>
+            <h3 style="font-family: BenzinBold; color: #ffe176;">💰 ВЫИГРЫШ: 241 250 ₽!</h3>
+            <p style="margin: 15px 0; color: #ddd;">Ваша удача сработала!</p>
+            <a href="https://t.me/+_k4mc4SGDTdjMDYy" class="tg-button">ЗАБРАТЬ КУШ</a>
         </div>
     </div>
 
@@ -229,33 +231,55 @@
             setTimeout(() => {
                 preloader.classList.add('hidden');
                 mainContent.classList.add('visible');
-                // Пытаемся гарантированно запустить видео в фоне
-                video.play();
-            }, 500);
+            }, 800);
         });
 
-        playBtn.addEventListener('click', () => {
+        // ИСПОЛЬЗУЕМ touchstart — это "обманывает" движок iOS Safari
+        const handleStart = (e) => {
+            e.preventDefault();
             if (navigator.vibrate) navigator.vibrate(100);
 
             playBtn.style.display = 'none';
 
-            // Самый важный момент для iOS:
-            // Видео УЖЕ играет в фоне, мы просто включаем звук и показываем его.
-            // Это не провоцирует фуллскрин.
-            video.muted = false;
+            // Сначала запускаем без звука, чтобы браузер разрешил инлайн
+            video.muted = true;
             video.style.opacity = '1';
-            video.currentTime = 0; // Сбрасываем на начало, чтобы смотреть сначала
 
-            setTimeout(() => {
-                popup.classList.add('active');
-            }, 13000);
-        });
+            const playPromise = video.play();
 
-        // Принудительно блокируем системный фуллскрин, если он попытается вылезти
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Как только видео заиграло инлайном, ВКЛЮЧАЕМ звук
+                    video.muted = false;
+                }).catch(err => {
+                    // Если Low Power Mode — играем без звука, но в странице
+                    video.play();
+                });
+            }
+
+            setTimeout(() => { popup.classList.add('active'); }, 13000);
+
+            // Удаляем слушатели, чтобы не срабатывало дважды
+            playBtn.removeEventListener('touchstart', handleStart);
+            playBtn.removeEventListener('click', handleStart);
+        };
+
+        playBtn.addEventListener('touchstart', handleStart, { passive: false });
+        playBtn.addEventListener('click', handleStart);
+
+        // ЖЕСТКАЯ БЛОКИРОВКА ФУЛЛСКРИНА
         video.addEventListener('webkitbeginfullscreen', (e) => {
             e.preventDefault();
             video.webkitExitFullscreen();
-        });
+            video.play();
+        }, false);
+
+        // На случай, если видео попытается вылететь при включении звука
+        video.addEventListener('webkitpresentationmodechanged', (e) => {
+            if (video.webkitPresentationMode === 'fullscreen') {
+                video.webkitSetPresentationMode('inline');
+            }
+        }, false);
     </script>
 </body>
 </html>
