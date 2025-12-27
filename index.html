@@ -1,290 +1,285 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Испытай удачу</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Испытай удачу</title>
 
-    <style>
-        @font-face {
-            font-family: "BenzinBold";
-            src: url("fonts/BenzinBold.woff2") format("woff2");
-            font-weight: 700;
-            font-display: swap;
-        }
+  <!-- Предзагрузка -->
+  <link rel="preload" href="fonts/BenzinBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="video/promo.mp4" as="video" type="video/mp4">
+  <link rel="preload" href="images/preview.png" as="image">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <style>
+    @font-face {
+      font-family: "BenzinBold";
+      src: url("fonts/BenzinBold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
 
-        body {
-            background: radial-gradient(circle at 30% 20%, #23254d 0%, #0e1124 60%);
-            color: #fff;
-            font-family: "Inter", sans-serif;
-            text-align: center;
-            overflow-x: hidden;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Прелоадер */
-        #preloader {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background: radial-gradient(circle at 30% 20%, #23254d 0%, #0e1124 70%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
+    body {
+      background: radial-gradient(circle at 30% 20%, #23254d 0%, #0e1124 60%);
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      text-align: center;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
 
-            #preloader.hidden {
-                opacity: 0;
-                visibility: hidden;
-                transition: 0.5s;
-            }
+    /* Прелоадер */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 30% 20%, #23254d 0%, #0e1124 70%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 100;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 480px;
-            display: none;
-        }
+    #preloader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
 
-            .container.visible {
-                display: block;
-            }
+    .plane {
+      width: 100px;
+      height: 100px;
+      background: url("images/preview.png") no-repeat center / contain;
+      animation: fly 2.5s ease-in-out infinite;
+    }
 
-        /* Контейнер видео */
-        .video-section {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-            aspect-ratio: 16 / 9;
-            background: #000;
-            -webkit-transform: translateZ(0);
-        }
+    @keyframes fly {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      50% { transform: translateY(-10px) rotate(2deg); opacity: 0.9; }
+      100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    }
 
-        video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-            pointer-events: none;
-            z-index: 1;
-        }
+    .loading-text {
+      font-family: "BenzinBold", sans-serif;
+      font-size: 22px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #ffe176, #ff5858);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulse 1.5s infinite;
+    }
 
-        /* Кастомный постер ПОВЕРХ видео */
-        #fakePoster {
-            position: absolute;
-            inset: 0;
-            background: url("images/preview.png") no-repeat center / cover;
-            z-index: 2; /* Он закрывает видео, пока оно играет в муте */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.3s;
-        }
+    @keyframes pulse {
+      0%,100% {opacity: 1;}
+      50% {opacity: 0.5;}
+    }
 
-        .play-button {
-            margin-top: 25px;
-            background: linear-gradient(135deg, #ff7b00, #ff2d55);
-            color: white;
-            font-family: "BenzinBold", sans-serif;
-            font-size: 20px;
-            padding: 18px 45px;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            max-width: 320px;
-            animation: pulse 2s infinite;
-            z-index: 10;
-        }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: none;
+    }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
+    .container.visible {
+      display: block;
+    }
 
-            50% {
-                transform: scale(1.05);
-            }
-        }
+    .video-section {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+    }
 
-        h2 {
-            font-family: "BenzinBold", sans-serif;
-            font-size: 26px;
-            margin-top: 40px;
-            background: linear-gradient(135deg, #ffe176, #ff5858);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    video {
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      display: block;
+      object-fit: cover;
+      background-color: #000;
+    }
 
-        .tg-button {
-            margin-top: 20px;
-            display: inline-block;
-            padding: 14px 30px;
-            font-family: "BenzinBold", sans-serif;
-            background: linear-gradient(135deg, #00b7ff, #007fff);
-            color: #fff;
-            border-radius: 50px;
-            text-decoration: none;
-            width: 100%;
-            max-width: 300px;
-        }
+    .play-button {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #ff7b00, #ff2d55);
+      color: white;
+      font-family: "BenzinBold", "Inter", sans-serif;
+      font-size: clamp(16px, 5vw, 20px);
+      padding: 16px 40px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(255, 90, 0, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: pulse 2s infinite;
+      width: 100%;
+      max-width: 320px;
+    }
 
-        /* Popup */
-        .popup {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            z-index: 200;
-            transition: 0.4s;
-            padding: 20px;
-        }
+    .play-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 25px rgba(255, 125, 0, 0.6);
+    }
 
-            .popup.active {
-                visibility: visible;
-                opacity: 1;
-            }
+    h2 {
+      font-family: "BenzinBold", "Inter", sans-serif;
+      font-size: clamp(22px, 5vw, 28px);
+      margin-top: 45px;
+      background: linear-gradient(135deg, #ffe176, #ff5858);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
 
-        .popup-content {
-            background: #151833;
-            border: 1px solid #2d3166;
-            border-radius: 20px;
-            padding: 35px 20px;
-            text-align: center;
-            width: 100%;
-            max-width: 320px;
-        }
+    .tg-button {
+      margin-top: 20px;
+      display: inline-block;
+      padding: 14px 30px;
+      font-family: "BenzinBold", "Inter", sans-serif;
+      background: linear-gradient(135deg, #00b7ff, #007fff);
+      color: #fff;
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: clamp(16px, 4.5vw, 18px);
+      box-shadow: 0 6px 18px rgba(0, 183, 255, 0.4);
+      transition: all 0.3s ease;
+      width: 100%;
+      max-width: 300px;
+    }
 
-        .site-logo {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
-        }
+    .tg-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0, 183, 255, 0.6);
+    }
 
-            .site-logo img {
-                width: clamp(120px, 28vw, 150px);
-            }
-    </style>
+    /* Popup */
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .popup.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .popup-content {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 35px 20px;
+      text-align: center;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(18px);
+      animation: scaleIn 0.4s ease forwards;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup h3 {
+      font-family: "BenzinBold", "Inter", sans-serif;
+      font-size: clamp(18px, 5vw, 22px);
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffe176, #ff5858);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .popup p {
+      font-size: clamp(14px, 4vw, 16px);
+      color: #ddd;
+      margin-bottom: 25px;
+    }
+
+    .popup .tg-button {
+      font-size: clamp(14px, 4.5vw, 17px);
+      padding: 12px 26px;
+    }
+  </style>
 </head>
 <body>
+  <!-- Прелоадер -->
+  <div id="preloader">
+    <div class="plane"></div>
+    <div class="loading-text">Загрузка Aviamasters...</div>
+  </div>
 
-    <div id="preloader">
-        <p style="font-family: BenzinBold; color: #ffe176;">ЗАГРУЗКА...</p>
+  <div class="container" id="mainContent">
+    <div class="video-section">
+      <video id="promoVideo" preload="auto" poster="image/preview.png" playsinline>
+        <source src="video/promo.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+      </video>
     </div>
 
-    <div class="site-logo">
-        <img src="https://luckybear.ai///_next/static/media/home_logo.a028b260.png" alt="Logo">
+    <button class="play-button" id="playBtn">ИСПЫТАТЬ УДАЧУ</button>
+
+    <h2>НАЧНИ ИГРАТЬ</h2>
+    <a href="https://t.me/+0wcFCYWLqiEyZDdi" target="_blank" class="tg-button">Перейти в Telegram</a>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <h3>💰 Вы могли выиграть 241 250 ₽!</h3>
+      <p>Попробуй прямо сейчас — удача может быть на твоей стороне.</p>
+      <a href="https://t.me/+0wcFCYWLqiEyZDdi" target="_blank" class="tg-button">Испытать удачу</a>
     </div>
+  </div>
 
-    <div class="container" id="mainContent">
-        <div class="video-section">
-            <!--
-              ВИДЕО ИГРАЕТ СРАЗУ (autoplay muted).
-              Это гарантирует инлайн-режим.
-            -->
-            <video id="promoVideo"
-                   preload="auto"
-                   autoplay
-                   muted
-                   loop
-                   playsinline
-                   webkit-playsinline="true"
-                   x5-playsinline="true"
-                   x5-video-player-type="h5-page">
-                <source src="video/promo.mp4" type="video/mp4">
-            </video>
+  <script>
+    const video = document.getElementById('promoVideo');
+    const playBtn = document.getElementById('playBtn');
+    const popup = document.getElementById('popup');
+    const preloader = document.getElementById('preloader');
+    const mainContent = document.getElementById('mainContent');
 
-            <!-- Наш фальшивый постер -->
-            <div id="fakePoster"></div>
-        </div>
+    // Ждём полной загрузки контента
+    window.addEventListener('load', () => {
+      // Даем браузеру чуть прогрузить видео и шрифт
+      setTimeout(() => {
+        preloader.classList.add('hidden');
+        mainContent.classList.add('visible');
+        // Принудительно загружаем превью, если видео не сразу доступно
+        video.load();
+      }, 500);
+    });
 
-        <button class="play-button" id="playBtn">ИСПЫТАТЬ УДАЧУ</button>
-
-        <h2>НАЧНИ ИГРАТЬ</h2>
-        <a href="https://t.me/+_k4mc4SGDTdjMDYy" class="tg-button">Telegram</a>
-    </div>
-
-    <div class="popup" id="popup">
-        <div class="popup-content">
-            <h3 style="font-family: BenzinBold; color: #ffe176;">💰 ВЫИГРЫШ: 241 250 ₽!</h3>
-            <p style="margin: 15px 0; color: #ddd;">Попробуй прямо сейчас!</p>
-            <a href="https://t.me/+_k4mc4SGDTdjMDYy" class="tg-button">ЗАБРАТЬ КУШ</a>
-        </div>
-    </div>
-
-    <script>
-        const video = document.getElementById('promoVideo');
-        const playBtn = document.getElementById('playBtn');
-        const fakePoster = document.getElementById('fakePoster');
-        const popup = document.getElementById('popup');
-        const preloader = document.getElementById('preloader');
-        const mainContent = document.getElementById('mainContent');
-
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-                mainContent.classList.add('visible');
-                // На всякий случай пинаем видео, чтобы оно точно заиграло в фоне
-                video.play();
-            }, 600);
-        });
-
-        // Функция активации звука
-        const activateVideo = (e) => {
-            e.preventDefault();
-
-            // 1. Убираем постер
-            fakePoster.style.opacity = '0';
-            setTimeout(() => { fakePoster.style.display = 'none'; }, 300);
-
-            // 2. Скрываем кнопку
-            playBtn.style.display = 'none';
-
-            // 3. САМОЕ ВАЖНОЕ: Видео уже играет. Мы просто включаем звук и ставим на начало.
-            video.muted = false;
-            video.currentTime = 0;
-
-            // Вибрация
-            if (navigator.vibrate) navigator.vibrate(100);
-
-            // Попап через 13 секунд
-            setTimeout(() => { popup.classList.add('active'); }, 13000);
-
-            // Чистим события
-            playBtn.removeEventListener('touchstart', activateVideo);
-            playBtn.removeEventListener('click', activateVideo);
-        };
-
-        playBtn.addEventListener('touchstart', activateVideo, { passive: false });
-        playBtn.addEventListener('click', activateVideo);
-
-        // Если iOS все равно выкинет в фуллскрин - гасим его моментально
-        video.addEventListener('webkitbeginfullscreen', (e) => {
-            e.preventDefault();
-            video.webkitExitFullscreen();
-        }, false);
-    </script>
+    // Кнопка "Испытать удачу"
+    playBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(100);
+      playBtn.style.display = 'none';
+      video.muted = false;
+      video.play().catch(() => {
+        // если браузер блокирует автоплей — разрешим со звуком вручную
+        video.muted = true;
+        video.play();
+      });
+      setTimeout(() => popup.classList.add('active'), 13000);
+    });
+  </script>
 </body>
 </html>
